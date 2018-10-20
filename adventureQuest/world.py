@@ -4,6 +4,7 @@ import tiles
 import player
 import json
 
+levels = {}
 _world = {}
 starting_position = (0,0)
 world_size = (0,0)
@@ -20,7 +21,6 @@ def load_tiles(level = "level_1"):
     T = Trap room
     L = Loot room
     X = Empty room
-    H = Hidden room
     D = Dungeon exit
     I:***** - Specific item room (must specify name of item after colon)
     B:***** - Boss / specific enemy room (must specify name of enemy after colon)

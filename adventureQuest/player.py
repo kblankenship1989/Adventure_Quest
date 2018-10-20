@@ -3,7 +3,7 @@ import random
 import enemies
 import world
 
-class Player():
+class Player:
   def __init__(self, name, difficulty):
     self.name = name
     print("Welcome to THE DUNGEON, " + name)

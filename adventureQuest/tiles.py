@@ -3,16 +3,15 @@ import items
 import enemies
 import player
 import world
-import actions
 
-_world = {}
 class MapTile:
-  def __init__(self, x, y, intro_text = "Another empty room.  It appears your journey continues!", map_symbol = "X", hidden = False):
+  def __init__(self, x, y, intro_text = "Another empty room.  It appears your journey continues!", map_symbol = "X", is_hidden = False, search_level = 0):
     self.x = x
     self.y = y
     self.intro_text = intro_text
-    self.hidden = hidden
+    self.is_hidden = is_hidden
     self.map_symbol = map_symbol
+	self.search_level = search_level
     self.visited = False
         
   def __str__(self):
@@ -28,41 +27,16 @@ class MapTile:
   def modify_player(self,player):
     self.visited = True
 
-  def adjacent_rooms(self):
-    moves = []
-    if world.tile_exists(self.x, self.y-1):
-      if world.get_tile(self.x,self.y-1).hidden:
-        moves.append(actions.SearchNorth())
-      else:
-        moves.append(actions.MoveNorth())
-    if world.tile_exists(self.x-1, self.y):
-      if world.get_tile(self.x-1, self.y).hidden:
-        moves.append(actions.SearchWest())
-      else:
-        moves.append(actions.MoveWest())
-    if world.tile_exists(self.x, self.y+1):
-      if world.get_tile(self.x, self.y+1).hidden:
-        moves.append(actions.SearchSouth())
-      else:
-        moves.append(actions.MoveSouth())
-    if world.tile_exists(self.x+1, self.y):
-      if world.get_tile(self.x+1, self.y).hidden:
-        moves.append(actions.SearchEast())
-      else:
-        moves.append(actions.MoveEast())
-    return moves
-  
-  def available_actions(self):
-    moves = self.adjacent_rooms()
-    moves.append(actions.ShowInventory())
-    moves.append(actions.ShowMap())
-    moves.append(actions.ShowHealth())
-    moves.append(actions.UseItem())
-    moves.append(actions.EquipWeapon())
-    moves.append(actions.EquipArmour())
-    moves.append(actions.Repair())
-    return moves
-    
+  def search(self, player):
+    if not self.is_hidden:
+	  print("There is nothing to unusual in this room.")
+	  return
+	if player.search_skill >= self.search_level:
+      self.is_hidden = False
+      print("You search the room and find a small switch on the wall.\nAfter pressing it, a door opens that wasn't there before.")
+    else:
+      print("After looking around the room, you do not see anything out of the ordinary.\nThis appears to be just another empty room.")  
+	  
 class StartingRoom(MapTile):
   def __init__(self, x, y, intro_text = "You awake in a dark, damp room in the middle of a cave.  Your first thought is escape!"):
     super().__init__(x, y , intro_text, "S", False)
@@ -131,33 +105,7 @@ class EnemyRoom(MapTile):
     if self.is_trap and self.enemy.is_alive():
       self.enemy.attack(player)
     super().modify_player(player)
-
-  def available_actions(self):
-    if self.enemy.is_alive():
-      moves = [actions.Attack(self.enemy), actions.Flee(self.enemy)]
-      moves.append(actions.ShowInventory())
-      moves.append(actions.ShowMap())
-      moves.append(actions.ShowHealth())
-      moves.append(actions.UseItem())
-      moves.append(actions.EquipWeapon())
-      moves.append(actions.EquipArmour())
-      return moves
-    else:
-      return super().available_actions()
       
-
-class HiddenRoom(MapTile):
-  def __init__(x, y, intro_text = "A hidden room!", search_level = 0):
-    self.search_level = search_level
-    super().__init__(x, y, intro_text, "X", True)
-    
-  def search(self, player):
-    if player.search_skill >= self.search_level:
-      self.hidden = False
-      print("You search the room and find a small switch on the wall.\nAfter pressing it, a door opens that wasn't there before.")
-    else:
-      print("After looking around the room, you do not see anything out of the ordinary.\nThis appears to be just another empty room.")
-
 class DungeonEnd(MapTile):
   def __init__(self, x, y, intro_text = "You found a door!"):
     super().__init__(x, y, intro_text, "E", False)
