@@ -161,7 +161,7 @@ class ChainMail(Armour):
   def __init__(self):
     super().__init__("Chain Mail", "A shirt of chain mail, providing decent protection but is a bit noisy", 10, 7, 10, 2)
 
-class UsableItem(Item):
+class Consumable(Item):
   def __init__(self, name, description, value, attr_affected, attr_increase):
     self.attr_affected = attr_affected
     self.attr_increase = attr_increase
@@ -176,10 +176,9 @@ class UsableItem(Item):
     setattr(player, self.attr_affected, __attr_val + self.attr_increase)
     print("Your {} has increased by {} and is now {}".format(self.attr_affected, self.attr_increase, getattr(player,self.attr_affected)))
 
-class HealthPotion(UsableItem):
-  def __init__(self, hp):
-    __value = round(hp/5,0)
-    super().__init__("Health Potion", "A strange brew.  Drinking it makes you feel invigorated!", __value, 'hp', hp)
+class HealthPotion(Consumable):
+  def __init__(self):
+    super().__init__("Health Potion", "A strange brew.  Drinking it makes you feel invigorated!", 5, 'hp', 10)
 
   def use(self,player):
     if player.hp >= player.max_hp:

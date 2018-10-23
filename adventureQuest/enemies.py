@@ -64,7 +64,7 @@ class Goblin(Enemy):
 					 , initiative_per_lvl = 0.1
 					 , level = level)
 	
-class Rat(Enemy):
+class RatSwarm(Enemy):
   def __init__(self):
     super().__init__('Rat', 2, 2, 0, 3)
 	

@@ -1,0 +1,66 @@
+[{
+	"level_01": {
+		"name":"A dark beginning",
+		"map":[
+			"L|X|X|X|S|X|X|X|X|X|X|X|X|X|X|X|X| | | | ",
+			" | | | |X| | | | |X| | | |X| | |X| | |T| ",
+			" |L| | |X| | | | |X| | |X|X| | |X|X|X|X| ",
+			" |X|X| |X| | | | |X| | |X| | | | | | | | ",
+			" | |H| |X| | | | |X| | |X| | | | | |E|D| ",
+			"X|X|X|X|X|X|X| | |X|X|X|X| | | | | |X| | ",
+			"X| | | | | | | | | | |X| | | |T| | |X| | ",
+			"X| | | |T| | | | | | |X| | |X|X|X|X|X|X| ",
+			"X| | |X|X|X| | | | | |X| | | |X| | | |X| ",
+			"X| | |X| |X| | | |X|X|X| | | |X|X|X| |X| ",
+			"X| | |X| |X| | | |X| |X| | | |X| |X|X|X| ",
+			"X|X|X|X| |X|X|X|X|X| |X| | | |X| | |H| | ",
+			" | | | | | | | | | | |X|X|X|X|X| | |L| | "
+			]
+		"search_level":1,
+		"enemies":{
+			"enemy":["RatSwarm","Goblin","GiantSpider"],
+			"prob":[0.2,0.4,0.1]
+			},
+		"items":{
+			"item":["MinorHealthPotion","Dagger","LightArmour","HealthPotion","ChainMail","Sword"]
+			"prob":[0.3,0.2,0.1,0.1,0.05,0.05]
+			},
+		"trader":{
+			"Gold":50,
+			"HealthPotion":1,
+			"MinorHealthPotion":3,
+			"Dagger":1,
+			"LightArmour":1
+			},
+		"kwargs":[
+			{
+				"x":0,
+				"y":0,
+				"kwargs":{
+					"item":"SearchSkillBook"
+				}
+			},
+			{
+				"x":18,
+				"y":12,
+				"kwargs":{
+					"item":"DungeonKey"
+				}
+			},
+			{
+				"x":1,
+				"y":2,
+				"kwargs":{
+					"item":"BroadAxe"
+				}
+			},
+			{
+				"x":18,
+				"y":4,
+				"kwargs":{
+					"enemy":"Ogre"
+				}
+			}
+		}
+	}
+]
