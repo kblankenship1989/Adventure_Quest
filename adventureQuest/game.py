@@ -1,9 +1,9 @@
 from collections import OrderedDict
 from player import Player
-import tiles
 import world
 import enemies
 import items
+import npc
 
 # def play():
   # world.load_tiles('level_1')

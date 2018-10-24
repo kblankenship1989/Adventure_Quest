@@ -13,7 +13,7 @@ class Player:
       self.repair_skill = 5
       self.search_level = 5
       self.initiative = 10
-      self.gold = items.Gold(50)
+      self.gold = 50
       self.inventory = [items.HealthPotion(10), items.HealthPotion(10)]
       self.equipped_weapon = items.Dagger()
       self.equipped_armour = items.LightArmour()
@@ -23,7 +23,7 @@ class Player:
       self.repair_skill = 3
       self.search_level = 3
       self.initiative = 5
-      self.gold = items.Gold(25)
+      self.gold = 25
       self.inventory = [items.HealthPotion(10)]
       self.equipped_weapon = items.Dagger()
       self.equipped_armour = items.Cloth()
@@ -33,7 +33,7 @@ class Player:
       self.repair_skill = 1
       self.search_level = 1
       self.initiative = 3
-      self.gold = items.Gold(15)
+      self.gold = 15
       self.inventory = []
       self.equipped_weapon = items.Rock()
       self.equipped_armour = items.Cloth()
@@ -54,7 +54,7 @@ class Player:
           + "\n\nEquipped Armour: "
           + str(self.equipped_armour)
           + "\n\n".join([str(x) for x in self.inventory])
-          + "\n\n" + str(self.gold) + "\n")
+          + "\n\nGold: " + str(self.gold) + "\n")
     
   def print_map(self):
     map_print = '--'

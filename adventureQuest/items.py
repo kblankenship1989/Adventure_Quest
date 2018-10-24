@@ -8,19 +8,6 @@ class Item:
 
   def __str__(self):
     return "{}\n======\n{}\nValue: {}".format(self.name, self.description, self.value)
-    
-class Gold(Item):
-  def __init__(self, amt):
-    self.name = 'Gold'
-    self.description = 'A sack of gold pieces'
-    self.value = amt
-    
-  def __add__(self, other_gold):
-    return self.value + other_gold.value
-	
-  def __sub__(self, other_gold):
-    return self.value - other_gold.value
-	
 
 class Weapon(Item):
   def __init__(self, name, description, value, max_damage, max_quality, weapon_penalty):
