@@ -9,7 +9,7 @@ _world = {}
 starting_position = (0,0)
 _items = []
 _enemies = []
-_trader = {}
+trade_inventory = []
 
 class MapTile:
   def __init__(self, x, y, intro_text = "Another empty room.  It appears your journey continues!", map_symbol = "X", is_hidden = False, search_level = 0):
@@ -174,17 +174,28 @@ def load_tiles(level):
   _items = current_level['items']
   global _enemies
   _enemies = current_level['enemies']
-  global _trader
-  _trader = current_level['trader']
+  global trade_inventory
+  trader = current_level['trade_inventory']
+  for item, qty in trader.items():
+	if item == 'Gold':
+		trade_inventory.append(items.Gold(qty))
+	else:
+		for i in range(qty):
+			trade_inventory.append(getattr(__import__("items",item))())
 
   global _world
   global starting_position
+  start_found = False
+  end_found = False
   for x in range(len(current_level["map"])):
     row = current_level["map"].split("|")
 	for y in range(len(row)):
+		if row[y].upper() == "E":
+			end_found = True
 		if row[y].upper() == "S":
 			starting_position = (x,y)
 			tile_key = "S"
+			start_found = True
 		elif row[y].upper() == "X":
 			tile = np.random.choice(["EnemyRoom","LootRoom","EmptyRoom"],1,[0.4,0.3,0.3])
 		else:
@@ -193,6 +204,8 @@ def load_tiles(level):
 		for kwarg in level['kwargs']:
 			if kwarg['x'] == x and kwarg['y'] == y:
 				kwargs = kwarg['kwargs']
+		if not (start_found and end_found):
+			raise SyntaxError("Map is invalid!")
 		_world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,kwargs)
  
 def tile_exists(x,y):

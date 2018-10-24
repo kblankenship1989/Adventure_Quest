@@ -16,8 +16,11 @@ class Gold(Item):
     self.value = amt
     
   def __add__(self, other_gold):
-    self.value += other_gold.value
-    return self
+    return self.value + other_gold.value
+	
+  def __sub__(self, other_gold):
+    return self.value - other_gold.value
+	
 
 class Weapon(Item):
   def __init__(self, name, description, value, max_damage, max_quality, weapon_penalty):
