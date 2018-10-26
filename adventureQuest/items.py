@@ -1,4 +1,5 @@
 import random
+import player
 
 class Item:
   def __init__(self, name, description, value):
@@ -8,6 +9,8 @@ class Item:
 
   def __str__(self):
     return "{}\n======\n{}\nValue: {}".format(self.name, self.description, self.value)
+
+##########################################################################################################
 
 class Weapon(Item):
   def __init__(self, name, description, value, max_damage, max_quality, weapon_penalty):
@@ -80,6 +83,8 @@ class BroadAxe(Weapon):
   def __init__(self):
     super().__init__("BroadAxe", "A massive axe!  Slow to swing but will cleave through anything it hits.", 15, 20, 20, 5)
 
+##########################################################################################################
+
 class Armour(Item):
   def __init__(self, name, description, value, max_protection, max_quality, armour_penalty):
     self.protection = max_protection
@@ -151,7 +156,9 @@ class ChainMail(Armour):
   def __init__(self):
     super().__init__("Chain Mail", "A shirt of chain mail, providing decent protection but is a bit noisy", 10, 7, 10, 2)
 
-class Consumable(Item):
+##########################################################################################################
+
+class StatIncrease(Item):
   def __init__(self, name, description, value, attr_affected, attr_increase):
     self.attr_affected = attr_affected
     self.attr_increase = attr_increase
@@ -166,20 +173,33 @@ class Consumable(Item):
     setattr(player, self.attr_affected, __attr_val + self.attr_increase)
     print("Your {} has increased by {} and is now {}".format(self.attr_affected, self.attr_increase, getattr(player,self.attr_affected)))
 
-class HealthPotion(Consumable):
-  def __init__(self):
-    super().__init__("Health Potion", "A strange brew.  Drinking it makes you feel invigorated!", 5, 'hp', 10)
+##########################################################################################################
+
+class Healing(Item):
+  def __init__(self, name, description, value, hp_gain):
+    self.hp_gain = hp_gain
+    super().__init__(name, description, value)
 
   def use(self,player):
     if player.hp >= player.max_hp:
       print("You cannot use this as you are at max HP")
-    elif player.hp > player.max_hp - self.attr_increase:
-      __dump = player.inventory.pop(index(self))
+    elif player.hp > player.max_hp - self.hp_gain:
+      player.inventory.remove(self)
       player.hp = player.max_hp
-      print("Your {} has increased by {} and is now {}".format(self.attr_affected, self.attr_increase, getattr(player,self.attr_affected)))
     else:
-      super().use(player)
+      player.hp += self.hp_gain
+    player.inventory.remove(self)
+    print("Your HP has increased by {} and is now {}".format(self.hp_gain, player.hp))
     
+class SpiderMeat(Healing):
+  def __init__(self):
+    super().__init__("Spider Meat", "A chunk of tender meat from a Giant Spider.  Hope it's not poisonous", 2, 5)
+    
+ class HealthPotion(Healing):
+  def __init__(self):
+    super().__init__("Health Potion", "A strange brew.  Holding it feels invigorating", 5, 10)
+##########################################################################################################
+
 class DungeonKey(Item):
   def __init__(self):
     self.name = 'Dungeon Key'

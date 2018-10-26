@@ -1,8 +1,9 @@
-import items
-import enemies
-import player
-import json
-import numpy as np
+import  items
+import  enemies
+import  player
+import  json
+import  numpy as np
+import npc as NPC
 
 _levels = {}
 _world = {}
@@ -37,8 +38,8 @@ class MapTile:
 
   def search(self, player):
     if not self.is_hidden:
-    print("There is nothing to unusual in this room.")
-    return
+      print("There is nothing to unusual in this room.")
+      return
     if player.search_skill >= self.search_level:
       self.is_hidden = False
       print("You search the room and find a small switch on the wall.\nAfter pressing it, a door opens that wasn't there before.")
@@ -60,6 +61,7 @@ class EmptyRoom(MapTile):
 class LootRoom(MapTile):
   def __init__(self, x, y, intro_text = "You found stuff!  Pick it up?", item = None, is_trap = False):
     self.is_trap = is_trap
+    self.gold = random.randint(5,25)
     if item is None:
       num_items = random.randint(1,(len(world._items)-1 if len(world._items) < 4 else 4))
       self.loot = []
@@ -81,8 +83,10 @@ class LootRoom(MapTile):
         self.modify_player(player)
 
   def modify_player(self, player):
-    player.add_loot(self.loot)
-    print("You have found: " + "\n\n".join([str(x) for x in self.loot]))
+    print("You find a small pile of rocks.  After moving some of them around, you discover:\n")
+    player.add_loot(self.gold,self.loot)
+    self.loot = []
+    self.gold = 0
     super().modify_player(player)
     if self.is_trap:
       world.set_tile(self.x, self.y, EnemyRoom(self.x, self.y, "As you reach for the loot, you hear something behind you...", None, True))
@@ -134,11 +138,16 @@ class DungeonEnd(MapTile):
       print("You have found the exit to the dungeon but it appears to be locked and you don't have the right key.\nYou will have to continue exploring until you find it.")
 
 class NPCTile(MapTile):
-  def __init__(self, x, y, intro_text = "Another traveler stands before you", npc)
+  def __init__(self, x, y, npc = NPC.NPC("Steve"), intro_text = "Another traveler stands before you"):
     self.npc = npc
     super().__init__(x, y, intro_text, "T", False)
  
  
+def load_levels():
+  with open('resources/levels.json','r') as f:
+    global _levels
+    _levels = json.load(f) 
+
 def load_tiles(level):
   """
   This function loads a reference text file to build the world.
@@ -153,21 +162,14 @@ def load_tiles(level):
     I:***** - Specific item room (must specify name of item after colon)
     B:***** - Boss / specific enemy room (must specify name of enemy after colon)
   """
-  global world_size
-  world_size_x, world_size_y = world_size
-      
   
   tile_list = {'S':"StartingRoom",
                'E':"EnemyRoom",
                'L':"LootRoom",
-      'T':"TraderRoom",
-      'H':"Hidden",
+               'T':"TraderRoom",
+               'H':"Hidden",
                'D':"DungeonEnd"
                }
-
-  with open('resources/levels.json'%level,'r') as f:
-    global _levels
-    _levels = json.load(f)
  
   current_level = _levels[level]
   
@@ -179,11 +181,11 @@ def load_tiles(level):
   global trade_gold
   trader = current_level['trade_inventory']
   for item, qty in trader.items():
-  if item == 'Gold':
-    trade_gold = qty
-  else:
-    for i in range(qty):
-      trade_inventory.append(getattr(__import__("items",item))())
+    if item == 'Gold':
+      trade_gold = qty
+    else:
+      for i in range(qty):
+        trade_inventory.append(getattr(__import__("items"),item)())
 
   global _world
   global starting_position
@@ -204,11 +206,11 @@ def load_tiles(level):
       tile = tile_list[row[y].upper()]
     kwargs = None
     for kwarg in level['kwargs']:
-    if kwarg['x'] == x and kwarg['y'] == y:
-      kwargs = kwarg['kwargs']
+      if kwarg['x'] == x and kwarg['y'] == y:
+        kwargs = kwarg['kwargs']
     if not (start_found and end_found):
       raise SyntaxError("Map is invalid!")
-    _world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,kwargs)
+    _world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,**kwargs)
  
 def tile_exists(x,y):
   return (x,y) in _world.keys()

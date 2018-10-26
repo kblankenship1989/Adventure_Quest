@@ -5,35 +5,9 @@ import enemies
 import items
 import npc
 
-# def play():
-  # world.load_tiles('level_1')
-  # player_name = input("Enter player name: ")
-  # difficulty = input("Enter difficulty [easy / medium / hard]:  ")
-  # p = Player(player_name, difficulty)
-  # while p.is_alive() and not player.victory:
-    # room = world.get_tile(player.location_x, player.location_y)
-    # room.enter_room(player)
-    # start_x = player.location_x
-    # start_y = player.location_y
-    # while p.is_alive() and not player.victory:
-      # input_text = "Choose an Action:\n"
-      # available_actions = room.available_actions()
-      # input_text += "\n".join([str(x) for x in available_actions]) + "\n\nAction:"
-      # user_action = input(input_text)
-      # while user_action.lower() not in [x.hotkey for x in available_actions]:
-        # user_action = input("Invalid action, please choose from the list below.\n\n" + input_text)
-      # for action in available_actions:
-        # if action.hotkey == user_action.lower():
-          # player.do_action(action, **action.kwargs)
-          # break
-      # if player.location_x != start_x or player.location_y != start_y:
-        # break
-    # world.set_tile(start_x, start_y, room)
-
 def play(level, p):
   world.load_tiles(level)
   
-  world.parse_world_dsl()
   while p.is_alive() and not p.victory:
     room = world.tile_at(p.location_x, p.location_y)
     room.enter_room(p)
@@ -103,15 +77,16 @@ if __name__ == '__main__':
     player_name = input("Enter player name: ")
     difficulty = input("Enter difficulty [easy / medium / hard]:  ")
     p = Player(player_name, difficulty)
-    lvls = sorted(world.levels.keys())
+    world.load_levels()
+    lvls = sorted(world._levels.keys())
     level = None
     while level is None:
       print("Please select Level to Play")
       for i in range(len(lvls)):
-        print("{}: {}".format(i,lvls[i]))
+        print("{}: {} - {}".format(i+1,lvls[i],world._levels[lvls[i]]['name']))
       lvl_input = input("Level:")
-      if lvls[lvl_input]:
-        level = lvls[lvl_input]
+      if lvls[int(lvl_input)-1]:
+        level = lvls[int(lvl_input)-1]
       else:
         print("Invalid level")
       play(level, p)

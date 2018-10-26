@@ -1,7 +1,7 @@
-import items
-import random
-import enemies
-import world
+import  items
+import  random
+import  enemies
+import  world
 
 class Player:
   def __init__(self, name, difficulty):
@@ -131,7 +131,8 @@ class Player:
     __dy = 0
     self.search(__dx, __dy)
 
-  def flee(self, enemy):
+  def flee(self):
+    enemy = world.tile_at(self.location_x, self.location_y).enemy
     __player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
     __tile = world.get_tile(self.location_x, self.location_y)
     if enemy.initiative > __player_initiative:
@@ -147,7 +148,8 @@ class Player:
       print("The {} has dealt a critical blow, leaving you mortally bleeding as it poises for the final strike!\nYou watch helplessly as your death comes.".format(enemy.name))
          #game_over
       
-  def attack(self, enemy):
+  def attack(self):
+    enemy = world.tile_at(self.location_x, self.location_y).enemy
     __player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
     if enemy.initiative > __player_initiative:
       if enemy.is_alive():
@@ -202,12 +204,15 @@ class Player:
       __usable = self.inventory.pop(int(__item))
       __usable.use(self)
 
-  def add_loot(self, _items):
-    for item in _items:
-      if isinstance(item, items.Gold):
-        self.gold += item
-      else:
-        self.inventory.append(item)
+  def add_loot(self, gold, loot):
+    if gold > 0:
+      print("{} gold\n".format(gold))
+      self.gold += gold
+    if len(loot) > 0:
+      for item in loot:
+        print(str(item)+"\n")
+      self.inventory += loot
+    print("You add these items to your bag and continue on your journey")
 
   def repair(self):
     __input_text = "Select item to repair:\nw: {} (equipped, Quality: {}/{})\na: {} (equipped, Quality: {}/{})\n".format(self.equipped_weapon.name, self.equipped_weapon.quality, self.equipped_weapon.max_quality, self.equipped_armour.name, self.equipped_armour.quality, self.equipped_armour.max_quality)
@@ -308,7 +313,13 @@ class Player:
       __sell = self.inventory.pop(int(__item))
       self.gold += items.Gold(__sell.value)
       
-  def do_action(self, action, **kwargs):
-    __action_method = getattr(self, action.method.__name__)
-    if __action_method:
-      __action_method(**kwargs)
+  def examine_enemy(self):
+    enemy = world.tile_at(self.location_x, self.location_y).enemy
+    if not enemy.is_alive():
+      if enemy.gold >0 or len(enemy.loot) > 0:
+        print("You examine the lifeless body of the {} and find:\n".format(enemy.name))
+        self.add_loot(enemy.gold, enemy.loot)
+        enemy.gold = 0
+        enemy.loot = []
+      else:
+        print("You examin the lifeless body of the {} and find nothing of interest.  Your journey continues".format(enemy.name))
