@@ -10,6 +10,7 @@ starting_position = (0,0)
 _items = []
 _enemies = []
 trade_inventory = []
+trade_gold = 0
 
 class MapTile:
   def __init__(self, x, y, intro_text = "Another empty room.  It appears your journey continues!", map_symbol = "X", is_hidden = False, search_level = 0):
@@ -18,7 +19,7 @@ class MapTile:
     self.intro_text = intro_text
     self.is_hidden = is_hidden
     self.map_symbol = map_symbol
-	self.search_level = search_level
+    self.search_level = search_level
     self.visited = False
         
   def __str__(self):
@@ -36,14 +37,14 @@ class MapTile:
 
   def search(self, player):
     if not self.is_hidden:
-	  print("There is nothing to unusual in this room.")
-	  return
-	if player.search_skill >= self.search_level:
+    print("There is nothing to unusual in this room.")
+    return
+    if player.search_skill >= self.search_level:
       self.is_hidden = False
       print("You search the room and find a small switch on the wall.\nAfter pressing it, a door opens that wasn't there before.")
     else:
       print("After looking around the room, you do not see anything out of the ordinary.\nThis appears to be just another empty room.")  
-	  
+   
 class StartingRoom(MapTile):
   def __init__(self, x, y, intro_text = "You awake in a dark, damp room in the middle of a cave.  Your first thought is escape!"):
     super().__init__(x, y , intro_text, "S", False)
@@ -55,7 +56,7 @@ class StartingRoom(MapTile):
 class EmptyRoom(MapTile):
   def __init__(self, x, y):
     super().__init__(x, y, "Another empty room.  Your journey continues!", "X", False)
-  	
+   
 class LootRoom(MapTile):
   def __init__(self, x, y, intro_text = "You found stuff!  Pick it up?", item = None, is_trap = False):
     self.is_trap = is_trap
@@ -135,9 +136,9 @@ class DungeonEnd(MapTile):
 class NPCTile(MapTile):
   def __init__(self, x, y, intro_text = "Another traveler stands before you", npc)
     self.npc = npc
-	super().__init__(x, y, intro_text, "T", False)
-	
-	
+    super().__init__(x, y, intro_text, "T", False)
+ 
+ 
 def load_tiles(level):
   """
   This function loads a reference text file to build the world.
@@ -159,15 +160,15 @@ def load_tiles(level):
   tile_list = {'S':"StartingRoom",
                'E':"EnemyRoom",
                'L':"LootRoom",
-			   'T':"TraderRoom",
-			   'H':"Hidden",
+      'T':"TraderRoom",
+      'H':"Hidden",
                'D':"DungeonEnd"
                }
 
   with open('resources/levels.json'%level,'r') as f:
     global _levels
-	_levels = json.load(f)
-	
+    _levels = json.load(f)
+ 
   current_level = _levels[level]
   
   global _items
@@ -175,13 +176,14 @@ def load_tiles(level):
   global _enemies
   _enemies = current_level['enemies']
   global trade_inventory
+  global trade_gold
   trader = current_level['trade_inventory']
   for item, qty in trader.items():
-	if item == 'Gold':
-		trade_inventory.append(items.Gold(qty))
-	else:
-		for i in range(qty):
-			trade_inventory.append(getattr(__import__("items",item))())
+  if item == 'Gold':
+    trade_gold = qty
+  else:
+    for i in range(qty):
+      trade_inventory.append(getattr(__import__("items",item))())
 
   global _world
   global starting_position
@@ -189,24 +191,24 @@ def load_tiles(level):
   end_found = False
   for x in range(len(current_level["map"])):
     row = current_level["map"].split("|")
-	for y in range(len(row)):
-		if row[y].upper() == "E":
-			end_found = True
-		if row[y].upper() == "S":
-			starting_position = (x,y)
-			tile_key = "S"
-			start_found = True
-		elif row[y].upper() == "X":
-			tile = np.random.choice(["EnemyRoom","LootRoom","EmptyRoom"],1,[0.4,0.3,0.3])
-		else:
-			tile = tile_list[row[y].upper()]
-		kwargs = None
-		for kwarg in level['kwargs']:
-			if kwarg['x'] == x and kwarg['y'] == y:
-				kwargs = kwarg['kwargs']
-		if not (start_found and end_found):
-			raise SyntaxError("Map is invalid!")
-		_world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,kwargs)
+  for y in range(len(row)):
+    if row[y].upper() == "E":
+      end_found = True
+    if row[y].upper() == "S":
+      starting_position = (x,y)
+      tile_key = "S"
+      start_found = True
+    elif row[y].upper() == "X":
+      tile = np.random.choice(["EnemyRoom","LootRoom","EmptyRoom"],1,[0.4,0.3,0.3])
+    else:
+      tile = tile_list[row[y].upper()]
+    kwargs = None
+    for kwarg in level['kwargs']:
+    if kwarg['x'] == x and kwarg['y'] == y:
+      kwargs = kwarg['kwargs']
+    if not (start_found and end_found):
+      raise SyntaxError("Map is invalid!")
+    _world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,kwargs)
  
 def tile_exists(x,y):
   return (x,y) in _world.keys()

@@ -46,7 +46,7 @@ class Trader(NonPlayableCharacter):
 						return
 					else:
 						buyer.gold -= to_buy.value
-						world.trade_inventory["Gold"] += to_buy.value
+						world.trade_gold += to_buy.value
 						world.trade_inventory.remove(to_buy)
 						buyer.inventory.append(to_buy)
 						print("You bought a new {}!  You now have {} gold remaining.".format(to_buy.name,buyer.gold.value))
@@ -66,12 +66,12 @@ class Trader(NonPlayableCharacter):
                     choice = int(user_input)
                     to_buy = seller.inventory[choice - 1]
 					price = round(to_buy.value*0.6,0)
-                    if price > world.trade_inventory["Gold"]:
+                    if price > world.trade_gold:
 						print("I don't have enough gold for that")
 						return
 					else:
 						seller.gold += price
-						world.trade_inventory["Gold"] -= price
+						world.trade_gold -= price
 						seller.inventory.remove(to_buy)
 						world.trade_inventory.append(to_buy)
 						print("You sold your {}!  You now have {} gold remaining.".format(to_buy.name,seller.gold.value))
