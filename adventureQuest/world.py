@@ -4,14 +4,17 @@ import  player
 import  json
 import  numpy as np
 import npc as NPC
+import sys
+import random
 
 _levels = {}
 _world = {}
 starting_position = (0,0)
-_items = []
-_enemies = []
+_items = {}
+_enemies = {}
 trade_inventory = []
 trade_gold = 0
+world_size = (0,0)
 
 class MapTile:
   def __init__(self, x, y, intro_text = "Another empty room.  It appears your journey continues!", map_symbol = "X", is_hidden = False, search_level = 0):
@@ -30,6 +33,7 @@ class MapTile:
     if self.visited:
       print("You have already been in this room.  There is nothing more to find\n")
     else:
+      player.xp_gain(1)
       print(self.intro_text)
       self.modify_player(player)
 
@@ -42,6 +46,7 @@ class MapTile:
       return
     if player.search_skill >= self.search_level:
       self.is_hidden = False
+      player.xp_gain(self.search_level)
       print("You search the room and find a small switch on the wall.\nAfter pressing it, a door opens that wasn't there before.")
     else:
       print("After looking around the room, you do not see anything out of the ordinary.\nThis appears to be just another empty room.")  
@@ -55,24 +60,22 @@ class StartingRoom(MapTile):
     super().modify_player(player)
 
 class EmptyRoom(MapTile):
-  def __init__(self, x, y):
-    super().__init__(x, y, "Another empty room.  Your journey continues!", "X", False)
+  def __init__(self, x, y, is_hidden = False, search_lvl = 0):
+    super().__init__(x, y, "Another empty room.  Your journey continues!", "X", is_hidden = is_hidden, search_level = search_lvl)
    
 class LootRoom(MapTile):
-  def __init__(self, x, y, intro_text = "You found stuff!  Pick it up?", item = None, is_trap = False):
+  def __init__(self, x, y, intro_text = "You found stuff!  Pick it up?", item = None, is_trap = False, is_hidden = False, search_lvl = 0):
     self.is_trap = is_trap
     self.gold = random.randint(5,25)
     if item is None:
-      num_items = random.randint(1,(len(world._items)-1 if len(world._items) < 4 else 4))
+      num_items = random.randint(1,2)
       self.loot = []
       for i in range(num_items):
-        item = world._items.pop(random.randint(0, len(world._items)-1))
+        item = np.random.choice(_items['item'],size=1,p=_items['prob'])[0]
         self.loot.append(getattr(__import__('items'),item)())
     else:
       self.loot = [getattr(__import__('items'),item)()]
-    __amt =  random.randint(0,50)
-    if __amt > 0:  self.loot.append(items.Gold(__amt))
-    super().__init__(x, y, intro_text)
+    super().__init__(x, y, intro_text, is_hidden = is_hidden, search_level = search_lvl)
   
   def enter_room(self, player):
     if self.visited:
@@ -89,26 +92,28 @@ class LootRoom(MapTile):
     self.gold = 0
     super().modify_player(player)
     if self.is_trap:
-      world.set_tile(self.x, self.y, EnemyRoom(self.x, self.y, "As you reach for the loot, you hear something behind you...", None, True))
-      world.get_tile(self.x, self.y).enter_room()
+      world.swap_tile(self.x, self.y, EnemyRoom(self.x, self.y, "As you reach for the loot, you hear something behind you...", None, True))
           
 class EnemyRoom(MapTile):
-  def __init__(self, x, y, intro_text = "An enemy!  AHHHH!", enemy = None, is_trap = False):
+  def __init__(self, x, y, intro_text = "An enemy!  AHHHH!", enemy = None, enemy_level = 1, is_trap = False, is_hidden = False, search_lvl = 0):
+    enemy_level = random.randint(_enemies['enemy_min_level'],_enemies['enemy_max_level'])
     if enemy is None:
-      enemy = world._enemies.pop(random.randint(0, len(world._enemies)-1))
-      self.enemy = getattr(__import__('enemies'),enemy)()
+      enemy = np.random.choice(_enemies['enemy'],size=1,p=_enemies['prob'])[0]
+      self.enemy = getattr(__import__('enemies'),enemy)(enemy_level)
     else:
-      self.enemy = getattr(__import__('enemies'),enemy)()
+      self.enemy = getattr(__import__('enemies'),enemy)(enemy_level)
     self.is_trap = is_trap
-    super().__init__(x, y, intro_text)
+    super().__init__(x, y, intro_text, is_hidden = is_hidden, search_level = search_lvl)
 
   def enter_room(self, player):
     if self.visited:
       if self.enemy.is_alive():
         print("The {} has been paitently waiting for your return and strikes as soon as you enter!".format(self.enemy.name))
+        self.enemy.attack(player)
       else:
         print("The lifeless body of the {} lies at your feet.  You take one last look to ensure it is dead and continue on your journey.".format(self.enemy.name))
     else:
+      print("A dark figure appears from the shadows.  A fierce {} stands before you, furious with you tresspassing in his home.".format(self.enemy.name))
       self.modify_player(player)
 
   def modify_player(self, player):
@@ -155,19 +160,16 @@ def load_tiles(level):
   Map is a list structure of 1-letter references to rooms:
     S = Starting room (1 per map)
     E = Enemy room
-    T = Trap room
+    T = NPC Room
     L = Loot room
     X = Empty room
     D = Dungeon exit
-    I:***** - Specific item room (must specify name of item after colon)
-    B:***** - Boss / specific enemy room (must specify name of enemy after colon)
   """
   
   tile_list = {'S':"StartingRoom",
                'E':"EnemyRoom",
                'L':"LootRoom",
-               'T':"TraderRoom",
-               'H':"Hidden",
+               'T':"NPCTile",
                'D':"DungeonEnd"
                }
  
@@ -189,40 +191,40 @@ def load_tiles(level):
 
   global _world
   global starting_position
+  global world_size
   start_found = False
   end_found = False
-  for x in range(len(current_level["map"])):
-    row = current_level["map"].split("|")
-  for y in range(len(row)):
-    if row[y].upper() == "E":
-      end_found = True
-    if row[y].upper() == "S":
-      starting_position = (x,y)
-      tile_key = "S"
-      start_found = True
-    elif row[y].upper() == "X":
-      tile = np.random.choice(["EnemyRoom","LootRoom","EmptyRoom"],1,[0.4,0.3,0.3])
-    else:
-      tile = tile_list[row[y].upper()]
-    kwargs = None
-    for kwarg in level['kwargs']:
-      if kwarg['x'] == x and kwarg['y'] == y:
-        kwargs = kwarg['kwargs']
-    if not (start_found and end_found):
-      raise SyntaxError("Map is invalid!")
-    _world[(x,y)] = getattr(__import__("tiles",tile))(x=x,y=y,**kwargs)
+  world_size_list = list(world_size)
+  for y in range(len(current_level["map"])):
+    row = current_level["map"][y].split("|")
+    if y > world_size_list[1]:  world_size_list[1] = y
+    for x in range(len(row)):
+      if x > world_size_list[0]:  world_size_list[0] = x
+      if row[x].upper() == "E":
+        end_found = True
+      if row[x].upper() == "S":
+        starting_position = (x,y)
+        tile = tile_list["S"]
+        start_found = True
+      elif row[x].upper() == "X":
+        tile = np.random.choice(["EnemyRoom","LootRoom","EmptyRoom"],size=1,p=[0.4,0.3,0.3])[0]
+      else:
+        tile = tile_list.get(row[x].upper())
+      kwargs = {}
+      if tile is None:  continue
+      for kwarg in current_level['kwargs']:
+        if kwarg['x'] == x and kwarg['y'] == y:
+          kwargs = kwarg['kwargs']
+      _world[(x,y)] = getattr(sys.modules[__name__],tile)(x=x,y=y,**kwargs)
+  if not (start_found and end_found):
+    raise SyntaxError("Map is invalid!")
+  world_size = tuple(world_size_list)
  
-def tile_exists(x,y):
-  return (x,y) in _world.keys()
-
-def get_tile(x,y):
-  if tile_exists(x,y):
-    return _world[(x,y)]
+def tile_at(x,y):
+  return _world.get((x,y))
+  
+def swap_tile(x,y,new_tile):
+  if isinstance(new_tile,MapTile):
+    _world[(x,y)] = new_tile
   else:
-    raise IndexError
-
-def set_tile(x,y,tile):
-  if tile_exists(x,y):
-    _world[(x,y)] = tile
-  else:
-    raise IndexError  
+    raise SyntaxError("Not a Map Tile")

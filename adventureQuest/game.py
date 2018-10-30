@@ -7,19 +7,22 @@ import npc
 
 def play(level, p):
   world.load_tiles(level)
-  
-  while p.is_alive() and not p.victory:
-    room = world.tile_at(p.location_x, p.location_y)
-    room.enter_room(p)
+  p.location_x, p.location_y = world.starting_position
+  prev_turn = (-1,-1)
+  while p.is_alive() and not p.victory and not p.quit:
+    if prev_turn != (p.location_x,p.location_y):
+      room = world.tile_at(p.location_x, p.location_y)
+      room.enter_room(p)
+    prev_turn = (p.location_x, p.location_y)
     choose_action(room, p)
-
+    
 
 def choose_action(room, player):
     action = None
     while not action:
       available_actions = get_available_actions(room, player)
       action_input = input("Action: ")
-      action = available_actions.get(action_input)
+      action = available_actions.get(action_input.upper())
       if action:
         action()
       else:
@@ -31,42 +34,46 @@ def get_available_actions(room, player):
   action_adder(actions, 'm', player.print_map, "Show map")
   action_adder(actions, 'hp', player.print_health, "Show health")
   action_adder(actions, 'ew', player.equip_weapon, "Equip weapon")
-  action.adder(actions, 'ea', player.equip_armour, "Equip armour")
+  action_adder(actions, 'ea', player.equip_armour, "Equip armour")
   if player.inventory:
     action_adder(actions, 'i', player.print_inventory, "Print inventory")
 		
-  if isinstance(room, world.EnemyTile) and room.enemy.is_alive():
+  if isinstance(room, world.EnemyRoom) and room.enemy.is_alive():
+    action_adder(actions, 'x', player.examine_enemy, "Examine enemy")
     action_adder(actions, 'f', player.attack, "Fight")
     action_adder(actions, 'r', player.flee, "Run back")
   else:
-    if isinstance(room, world.EnemyTile):
+    action_adder(actions, 're', player.repair, "Repair Equipment")
+    if isinstance(room, world.EnemyRoom):
       action_adder(actions, 'x', player.examine_enemy, "Examine body")
-      action_adder(actions, 'r', player.repair, "Repair Equipment")
-      if world.tile_at(room.x, room.y - 1):
-        if world.tile_at(room.x, room.y-1).is_hidden:
-          action_adder(actions, 'sw', player.search_north, "Search north wall")
-        else:
-          action_adder(actions, 'w', player.move_north, "Go north")
-        if world.tile_at(room.x, room.y + 1):
-          if world.tile_at(room.x, room.y+1).is_hidden:
-            action_adder(actions, 'ss', player.search_north, "Search south wall")
-          else:
-            action_adder(actions, 's', player.move_south, "Go south")
-        if world.tile_at(room.x + 1, room.y):
-          if world.tile_at(room.x+1, room.y).is_hidden:
-            action_adder(actions, 'sd', player.search_north, "Search east wall")
-          else:
-            action_adder(actions, 'd', player.move_east, "Go east")
-        if world.tile_at(room.x - 1, room.y):
-          if world.tile_at(room.x-1, room.y).is_hidden:
-            action_adder(actions, 'sa', player.search_north, "Search west wall")
-          else:
-            action_adder(actions, 'a', player.move_west, "Go west")
+    if world.tile_at(room.x, room.y - 1):
+      if world.tile_at(room.x, room.y-1).is_hidden:
+        action_adder(actions, 'sw', player.search_north, "Search north wall")
+      else:
+        action_adder(actions, 'w', player.move_north, "Go north")
+    if world.tile_at(room.x, room.y + 1):
+      if world.tile_at(room.x, room.y+1).is_hidden:
+        action_adder(actions, 'ss', player.search_north, "Search south wall")
+      else:
+        action_adder(actions, 's', player.move_south, "Go south")
+    if world.tile_at(room.x + 1, room.y):
+      if world.tile_at(room.x+1, room.y).is_hidden:
+        action_adder(actions, 'sd', player.search_north, "Search east wall")
+      else:
+        action_adder(actions, 'd', player.move_east, "Go east")
+    if world.tile_at(room.x - 1, room.y):
+      if world.tile_at(room.x-1, room.y).is_hidden:
+        action_adder(actions, 'sa', player.search_north, "Search west wall")
+      else:
+        action_adder(actions, 'a', player.move_west, "Go west")
     if player.hp < player.max_hp:
-      action_adder(actions, 'h', player.use_item, "Heal")
+      action_adder(actions, 'h', player.heal, "Heal")
+  action_adder(actions,'q', player.quit_game, "Quit")
 
   return actions
 	
+
+
 def action_adder(action_dict, hotkey, action, name):
   action_dict[hotkey.upper()] = action
   print("{}: {}".format(hotkey, name))

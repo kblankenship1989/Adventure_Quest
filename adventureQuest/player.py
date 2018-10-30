@@ -2,6 +2,7 @@ import  items
 import  random
 import  enemies
 import  world
+import math
 
 class Player:
   def __init__(self, name, difficulty):
@@ -10,37 +11,61 @@ class Player:
     if difficulty.lower() == "easy":
       self.hp = 100
       self.max_hp = 100
-      self.repair_skill = 5
-      self.search_level = 5
+      self.repair_skill = 3
+      self.search_skill = 3
       self.initiative = 10
       self.gold = 50
-      self.inventory = [items.HealthPotion(10), items.HealthPotion(10)]
-      self.equipped_weapon = items.Dagger()
+      self.inventory = [items.MinorHealthPotion(), items.MinorHealthPotion()]
+      self.equipped_weapon = items.Sword()
       self.equipped_armour = items.LightArmour()
     elif difficulty.lower() == "medium":
       self.hp = 75
       self.max_hp = 75
-      self.repair_skill = 3
-      self.search_level = 3
+      self.repair_skill = 2
+      self.search_skill = 2
       self.initiative = 5
       self.gold = 25
-      self.inventory = [items.HealthPotion(10)]
+      self.inventory = [items.MinorHealthPotion()]
       self.equipped_weapon = items.Dagger()
-      self.equipped_armour = items.Cloth()
+      self.equipped_armour = items.LightArmour()
     else:
       self.hp = 50
       self.max_hp = 50
       self.repair_skill = 1
-      self.search_level = 1
+      self.search_skill = 1
       self.initiative = 3
       self.gold = 15
       self.inventory = []
-      self.equipped_weapon = items.Rock()
+      self.equipped_weapon = items.Dagger()
       self.equipped_armour = items.Cloth()
     self.location_x, self.location_y = world.starting_position
     self.prev_location_x = self.location_x
     self.prev_location_y = self.location_y
     self.victory = False  
+    self.quit = False
+    self.xp = 0
+    self.level = 1
+    self.hp_per_lvl = 10
+    self.repair_skill_per_lvl = 1
+    self.search_skill_per_lvl = 1
+    self.initiative_per_lvl = 2
+    
+  def quit_game(self):
+    self.quit = True
+    
+  def xp_gain(self, xp):
+    self.xp += xp
+    if self.xp > round(self.level*math.log10(self.level)*50,0):
+      self.level_up()
+    
+  def level_up(self):
+    print("You leveled up! You are now level {}".format(self.level))
+    self.max_hp += self.hp_per_lvl
+    self.hp += self.hp_per_lvl
+    self.initiative += self.initiative_per_lvl
+    self.repair_skill += self.repair_skill_per_lvl
+    self.search_skill += self.search_skill_per_lvl
+    self.level += 1
   
   def is_alive(self):
     return self.hp > 0
@@ -53,6 +78,7 @@ class Player:
           + str(self.equipped_weapon)
           + "\n\nEquipped Armour: "
           + str(self.equipped_armour)
+          + "\n\n"
           + "\n\n".join([str(x) for x in self.inventory])
           + "\n\nGold: " + str(self.gold) + "\n")
     
@@ -67,9 +93,9 @@ class Player:
       for x in range(max_x+1):
         if x == self.location_x and y == self.location_y:
           map_print += "O"
-        elif world.tile_exists(x,y):
-          if world.get_tile(x,y).visited:
-            map_print += world.get_tile(x,y).map_symbol
+        elif world.tile_at(x,y):
+          if world.tile_at(x,y).visited:
+            map_print += world.tile_at(x,y).map_symbol
           else:
             map_print += " "
         else:
@@ -87,61 +113,57 @@ class Player:
     self.location_y += dy
 
   def move_north(self):
-    __dx = 0
-    __dy = -1
-    self.move(__dx, __dy)
+    dx = 0
+    dy = -1
+    self.move(dx, dy)
 
   def move_east(self):
-    __dx = 1
-    __dy = 0
-    self.move(__dx, __dy)
+    dx = 1
+    dy = 0
+    self.move(dx, dy)
 
   def move_south(self):
-    __dx = 0
-    __dy = 1
-    self.move(__dx, __dy)
+    dx = 0
+    dy = 1
+    self.move(dx, dy)
 
   def move_west(self):
-    __dx = -1
-    __dy = 0
-    self.move(__dx, __dy)
+    dx = -1
+    dy = 0
+    self.move(dx, dy)
   
   def search(self, dx, dy):
-    __tile = world.get_tile(self.location_x + dx, self.location_y + dy)
-    __tile.search(self)
-    world.set_tile(self.location_x + dx, self.location_y + dy, __tile)    
+    tile = world.tile_at(self.location_x + dx, self.location_y + dy)
+    tile.search(self)    
 
   def search_north(self):
-    __dx = 0
-    __dy = -1
-    self.search(__dx, __dy)
+    dx = 0
+    dy = -1
+    self.search(dx, dy)
 
   def search_east(self):
-    __dx = 1
-    __dy = 0
-    self.search(__dx, __dy)
+    dx = 1
+    dy = 0
+    self.search(dx, dy)
 
   def search_south(self):
-    __dx = 0
-    __dy = 1
-    self.search(__dx, __dy)
+    dx = 0
+    dy = 1
+    self.search(dx, dy)
 
   def search_west(self):
-    __dx = -1
-    __dy = 0
-    self.search(__dx, __dy)
+    dx = -1
+    dy = 0
+    self.search(dx, dy)
 
   def flee(self):
     enemy = world.tile_at(self.location_x, self.location_y).enemy
-    __player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
-    __tile = world.get_tile(self.location_x, self.location_y)
-    if enemy.initiative > __player_initiative:
+    player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
+    if enemy.initiative > player_initiative:
       print("As you attempt to flee, the {} is too quick for you and strikes one last time.\n{} deals {} damage to you, but your {} manages to block {} of it.".format(enemy.name, enemy.name, enemy.damage, self.equipped_armour.name, self.equipped_armour.protection))
       self.hp -= (enemy.damage - self.equipped_armour.protection if enemy.damage > self.equipped_armour.protection else 0)
     if self.is_alive():
       print("You manage to escape back the way you came, but the {} will be waiting when you return....".format(enemy.name))
-      __tile.is_trap = True
-      world.set_tile(self.location_x, self.location_y, __tile)
       self.location_x = self.prev_location_x
       self.location_y = self.prev_location_y
     else:
@@ -150,8 +172,8 @@ class Player:
       
   def attack(self):
     enemy = world.tile_at(self.location_x, self.location_y).enemy
-    __player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
-    if enemy.initiative > __player_initiative:
+    player_initiative = self.initiative - self.equipped_weapon.weapon_penalty - self.equipped_armour.armour_penalty
+    if enemy.initiative > player_initiative:
       if enemy.is_alive():
         print("Your prepare to attack but the {} is too quick for you and strikes first.\n{} deals {} damage to you, but your {} manages to block {} of it.".format(enemy.name, enemy.name, enemy.damage, self.equipped_armour.name, self.equipped_armour.protection))
         self.hp -= (enemy.damage - self.equipped_armour.protection if enemy.damage > self.equipped_armour.protection else 0)
@@ -162,6 +184,7 @@ class Player:
             self.equipped_weapon.weardown(self)
           if not enemy.is_alive():
             print("You have dealt a critical blow to the {} and it now lies dead and bleeding at your feet.".format(enemy.name))
+            self.xp_gain(enemy.xp)
         else:
           print("The {} has dealt a critical blow, leaving you mortally bleeding as it poises for the final strike!\nYou watch helplessly as your death comes.".format(enemy.name))
           #game_over
@@ -174,6 +197,7 @@ class Player:
         self.equipped_weapon.weardown(self)
       if not enemy.is_alive():
         print("You have dealt a critical blow to the {} and it now lies dead and bleeding at your feet.".format(enemy.name))
+        self.xp_gain(enemy.xp)
       else:
         self.hp -= (enemy.damage - self.equipped_armour.protection if enemy.damage > self.equipped_armour.protection else 0)
         print("The {} strikes back in retaliation, dealing {} damage to you as you fail to duck out of the way, but your {} manages to block {} of it.".format(enemy.name, enemy.damage, self.equipped_armour.name, self.equipped_armour.protection))
@@ -181,28 +205,28 @@ class Player:
           print("The {} has dealt a critical blow, leaving you mortally bleeding as it poises for the final strike!\nYou watch helplessly as your death comes.".format(enemy.name))
           #game over
 
-  def use_item(self):
-    __input_text = "Select the item to use:\n"
+  def heal(self):
+    input_text = "Select the item to use:\n"
     for i in range(len(self.inventory)):
-      if isinstance(self.inventory[i], items.UsableItem):
-        __input_text += "{}:  {}\n".format(i, self.inventory[i].name)
-    __input_text += "x: Cancel\n"
-    __item = input(__input_text)
-    __valid = False
-    while not __valid:
-      if __item.lower() == "x":
-        __valid = True
+      if isinstance(self.inventory[i], items.Healing):
+        input_text += "{}:  {}\n".format(i, self.inventory[i].name)
+    input_text += "x: Cancel\n"
+    item = input(input_text)
+    valid = False
+    while not valid:
+      if item.lower() == "x":
+        valid = True
         break
-      elif __item.isdigit():
-        if int(__item) >= 0 and int(__item) < len(self.inventory):
-          __valid = True
+      elif item.isdigit():
+        if int(item) >= 0 and int(item) < len(self.inventory):
+          valid = True
           break
-      __item = input("Invalid selection.  Please select from the list below.\n" + __input_text)
-    if __item.lower() == "x":
+      item = input("Invalid selection.  Please select from the list below.\n" + input_text)
+    if item.lower() == "x":
       pass
     else:
-      __usable = self.inventory.pop(int(__item))
-      __usable.use(self)
+      usable = self.inventory.pop(int(item))
+      usable.use(self)
 
   def add_loot(self, gold, loot):
     if gold > 0:
@@ -211,111 +235,119 @@ class Player:
     if len(loot) > 0:
       for item in loot:
         print(str(item)+"\n")
+        if isinstance(item,items.StatIncrease):
+          item.use(self)
+          loot.remove(item)
       self.inventory += loot
     print("You add these items to your bag and continue on your journey")
 
   def repair(self):
-    __input_text = "Select item to repair:\nw: {} (equipped, Quality: {}/{})\na: {} (equipped, Quality: {}/{})\n".format(self.equipped_weapon.name, self.equipped_weapon.quality, self.equipped_weapon.max_quality, self.equipped_armour.name, self.equipped_armour.quality, self.equipped_armour.max_quality)
+    input_text = "Select item to repair:\nw: {} (equipped, Quality: {}/{})\na: {} (equipped, Quality: {}/{})\n".format(self.equipped_weapon.name, self.equipped_weapon.quality, self.equipped_weapon.max_quality, self.equipped_armour.name, self.equipped_armour.quality, self.equipped_armour.max_quality)
     for i in range(len(self.inventory)):
       item = self.inventory[i]
       if isinstance(item, items.Weapon) or isinstance(item, items.Armour):
-        __input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
-    __input_test += "x: Cancel \n"
-    __item = input(__input_text)
-    __valid = False
-    while not __valid:
-      if __item.lower() in ["a", "w", "x"]:
-        __valid = True
+        input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
+    input_text += "x: Cancel \n"
+    item = input(input_text)
+    valid = False
+    while not valid:
+      if item.lower() in ["a", "w", "x"]:
+        valid = True
         break
-      elif __item.isdigit():
-        if int(__item) >= 0 and int(__item) < len(self.inventory):
-          __valid = True
+      elif item.isdigit():
+        if int(item) >= 0 and int(item) < len(self.inventory):
+          valid = True
           break
-      __item = input("Invalid input.  Please select from the list below.\n" + __input_text)
-    if __item.lower() == "x":
+      item = input("Invalid input.  Please select from the list below.\n" + input_text)
+    if item.lower() == "x":
       pass
-    elif __item.lower() == "a":
+    elif item.lower() == "a":
       self.equipped_armour.repair(self)
-    elif __item.lower() == "w":
+    elif item.lower() == "w":
       self.equipped_weapon.repair(self)
     else:
-      self.inventory[int(__item)].repair(self)
+      self.inventory[int(item)].repair(self)
   
   def equip_weapon(self):
-    __input_text = "Select:\nw: {} (equipped, Quality: {}/{})\n".format(self.equipped_weapon.name, self.equipped_weapon.quality, self.equipped_weapon.max_quality)
+    input_text = "Select:\nw: {} (equipped, Quality: {}/{})\n".format(self.equipped_weapon.name, self.equipped_weapon.quality, self.equipped_weapon.max_quality)
     for i in range(len(self.inventory)):
       item = self.inventory[i]
       if isinstance(item, items.Weapon):
-        __input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
-    __input_text += "x: Cancel \n"
-    __item = input(__input_text)
-    __valid = False
-    while not __valid:
-      if __item.lower() in ["x","w"]:
-        __valid = True
+        input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
+    input_text += "x: Cancel \n"
+    item = input(input_text)
+    valid = False
+    while not valid:
+      if item.lower() in ["x","w"]:
+        valid = True
         break
-      elif __item.isdigit():
-        if int(__item) >= 0 and int(__item) < len(self.inventory):
-          __valid = True
+      elif item.isdigit():
+        if int(item) >= 0 and int(item) < len(self.inventory):
+          valid = True
           break
-      __item = input("Invalid input.  Please select from the list below.\n" + __input_text)
-    if __item.lower() in ["x","w"]:
+      item = input("Invalid input.  Please select from the list below.\n" + input_text)
+    if item.lower() in ["x","w"]:
       pass
     else:
-      __chosen_weapon = self.inventory.pop(int(__item))
+      chosen_weapon = self.inventory.pop(int(item))
       self.inventory.append(self.equipped_weapon)
-      self.equipped_weapon = __chosen_weapon
+      self.equipped_weapon = chosen_weapon
   
   def equip_armour(self):
-    __input_text = "Select:\na: {} (equipped, Quality: {}/{})\n".format(self.equipped_armour.name, self.equipped_armour.quality, self.equipped_armour.max_quality)
+    input_text = "Select:\na: {} (equipped, Quality: {}/{})\n".format(self.equipped_armour.name, self.equipped_armour.quality, self.equipped_armour.max_quality)
     for i in range(len(self.inventory)):
       item = self.inventory[i]
       if isinstance(item, items.Armour):
-        __input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
-    __input_text += "x: Cancel \n"
-    __item = input(__input_text)
-    __valid = False
-    while not __valid:
-      if __item.lower() in ["x","a"]:
-        __valid = True
+        input_text += "{}: {} (Quality: {}/{})\n".format(i, item.name, item.quality, item.max_quality)
+    input_text += "x: Cancel \n"
+    item = input(input_text)
+    valid = False
+    while not valid:
+      if item.lower() in ["x","a"]:
+        valid = True
         break
-      elif __item.isdigit():
-        if int(__item) >= 0 and int(__item) < len(self.inventory):
-          __valid = True
+      elif item.isdigit():
+        if int(item) >= 0 and int(item) < len(self.inventory):
+          valid = True
           break
-      __item = input("Invalid input.  Please select from the list below.\n" + __input_text)
-    if __item.lower() in ["x","a"]:
+      item = input("Invalid input.  Please select from the list below.\n" + input_text)
+    if item.lower() in ["x","a"]:
       pass
     else:
-      __chosen_armour = self.inventory.pop(int(__item))
+      chosen_armour = self.inventory.pop(int(item))
       self.inventory.append(self.equipped_armour)
-      self.equipped_armour = __chosen_armour
+      self.equipped_armour = chosen_armour
   
 
   def sell_loot(self):
-    __input_text = "Select item to sell:\n"
+    input_text = "Select item to sell:\n"
     for i in range(len(self.inventory)):
-      __input_text += "{}: {} ({} gold)".format(i, self.inventory[i].name, self.inventory[i].value)
-    __item = input(__input_text)
-    __valid = False
-    while not __valid:
-      if __item.lower() == "x":
-        __valid = True
+      input_text += "{}: {} ({} gold)".format(i, self.inventory[i].name, self.inventory[i].value)
+    item = input(input_text)
+    valid = False
+    while not valid:
+      if item.lower() == "x":
+        valid = True
         break
-      elif __item.isdigit():
-        if int(__item) >= 0 and int(__item) < len(self.inventory):
-          __valid = True
+      elif item.isdigit():
+        if int(item) >= 0 and int(item) < len(self.inventory):
+          valid = True
           break
-      __item = input("Invalid selection.  Please select from the list below.\n" + __input_text)
-    if __item.lower() == "x":
+      item = input("Invalid selection.  Please select from the list below.\n" + input_text)
+    if item.lower() == "x":
       pass
     else:
-      __sell = self.inventory.pop(int(__item))
-      self.gold += items.Gold(__sell.value)
+      sell = self.inventory.pop(int(item))
+      self.gold += items.Gold(sell.value)
       
   def examine_enemy(self):
     enemy = world.tile_at(self.location_x, self.location_y).enemy
-    if not enemy.is_alive():
+    if enemy.is_alive():
+      if enemy.hp == enemy.max_hp:
+        print("The {} doesn't seem to have a scratch on it.  It looks ready to fight!".format(enemy.name))
+      else:
+        print("The {} appears injured.  It has {} hp remaining but will not back down.".format(enemy.name, enemy.hp))
+    else:
       if enemy.gold >0 or len(enemy.loot) > 0:
         print("You examine the lifeless body of the {} and find:\n".format(enemy.name))
         self.add_loot(enemy.gold, enemy.loot)

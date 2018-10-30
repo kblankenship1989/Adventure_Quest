@@ -36,9 +36,11 @@ class Weapon(Item):
         print("You apparently do not have much experience with {}s, as you have made it worse than it was before!".format(self.name))
       elif new_quality >= self.max_quality:
         player.repair_skill += 2
+        player.xp_gain(5)
         print("You are a master of ingenuity!  You have repaired your {} to a level greater than any have ever thought possible!".format(self.name))
       elif new_quality > start_quality:
         player.repair_skill += 1
+        player.xp_gain(2)
         print("You managed to improve the quality of your {} by some degree.  At least it is better than it was.".format(self.name))
       else:
         print("After inspecting further, you felt it wasn't the right time to try messing with your {}.  Maybe another day.".format(self.name))
@@ -48,7 +50,7 @@ class Weapon(Item):
     self.quality -= 1
     self.qualityCheck(player)
 
-  def qualityCheck(player):
+  def qualityCheck(self,player):
     if self.quality <= 0:
       self.shatter(player)
     elif self.quality <= 1:
@@ -109,9 +111,11 @@ class Armour(Item):
         print("You apparently do not have much experience with {}s, as you have made it worse than it was before!".format(self.name))
       elif new_quality >= self.max_quality:
         player.repair_skill += 2
+        player.xp_gain(5)
         print("You are a master of ingenuity!  You have repaired your {} to a level greater than any have ever thought possible!".format(self.name))
       elif new_quality > start_quality:
         player.repair_skill += 1
+        player.xp_gain(2)
         print("You managed to improve the quality of your {} by some degree.  At least it is better than it was.".format(self.name))
       else:
         print("After inspecting further, you felt it wasn't the right time to try messing with your {}.  Maybe another day.".format(self.name))
@@ -165,13 +169,16 @@ class StatIncrease(Item):
     super().__init__(name, description, value)
 
   def __str__(self):
-    return super().__str__() + "Use:  Adds {} to {}\n".format(self.attr_increase, self.attr_affected)
+    return super().__str__() + "\nUse:  Adds {} to {}\n".format(self.attr_increase, self.attr_affected)
 
   def use(self, player):
-    __dump = player.inventory.pop(index(self))
-    __attr_val = getattr(player, self.attr_affected)
-    setattr(player, self.attr_affected, __attr_val + self.attr_increase)
+    attr_val = getattr(player, self.attr_affected)
+    setattr(player, self.attr_affected, attr_val + self.attr_increase)
     print("Your {} has increased by {} and is now {}".format(self.attr_affected, self.attr_increase, getattr(player,self.attr_affected)))
+    
+class SearchSkillBook(StatIncrease):
+  def __init__(self):
+    super().__init__("Search Skill Book","A book titled 'Finding Secret Rooms for Dummies'", 0, 'search_skill', 1)
 
 ##########################################################################################################
 
@@ -184,18 +191,20 @@ class Healing(Item):
     if player.hp >= player.max_hp:
       print("You cannot use this as you are at max HP")
     elif player.hp > player.max_hp - self.hp_gain:
-      player.inventory.remove(self)
       player.hp = player.max_hp
     else:
       player.hp += self.hp_gain
-    player.inventory.remove(self)
     print("Your HP has increased by {} and is now {}".format(self.hp_gain, player.hp))
     
 class SpiderMeat(Healing):
   def __init__(self):
-    super().__init__("Spider Meat", "A chunk of tender meat from a Giant Spider.  Hope it's not poisonous", 2, 5)
+    super().__init__("Spider Meat", "A chunk of tender meat from a Giant Spider.  Hope it's not poisonous", 1, 2)
     
- class HealthPotion(Healing):
+class MinorHealthPotion(Healing):
+  def __init__(self):
+    super().__init__("Minor Health Potion", "A small vial of healing elixar.", 2, 5)
+
+class HealthPotion(Healing):
   def __init__(self):
     super().__init__("Health Potion", "A strange brew.  Holding it feels invigorating", 5, 10)
 ##########################################################################################################
