@@ -20,7 +20,7 @@
 			"enemy":["RatSwarm","Goblin","GiantSpider"],
 			"prob":[0.45,0.45,0.1],
       "enemy_min_level":1,
-      "enemy_max_level":3
+      "enemy_max_level":2
 			},
 		"items":{
 			"item":["MinorHealthPotion","Dagger","LightArmour","HealthPotion","ChainMail","Club"],
@@ -59,7 +59,8 @@
 				"x":18,
 				"y":4,
 				"kwargs":{
-          "enemy":"GiantSpider"
+          "enemy":"GiantSpider",
+          "enemy_lvl":3
 				}
       },
       {

@@ -95,13 +95,13 @@ class LootRoom(MapTile):
       world.swap_tile(self.x, self.y, EnemyRoom(self.x, self.y, "As you reach for the loot, you hear something behind you...", None, True))
           
 class EnemyRoom(MapTile):
-  def __init__(self, x, y, intro_text = "An enemy!  AHHHH!", enemy = None, enemy_level = 1, is_trap = False, is_hidden = False, search_lvl = 0):
-    enemy_level = random.randint(_enemies['enemy_min_level'],_enemies['enemy_max_level'])
+  def __init__(self, x, y, intro_text = "An enemy!  AHHHH!", enemy = None, enemy_lvl = None, is_trap = False, is_hidden = False, search_lvl = 0):
+    if enemy_lvl is None:  enemy_lvl = random.randint(_enemies['enemy_min_level'],_enemies['enemy_max_level'])
     if enemy is None:
       enemy = np.random.choice(_enemies['enemy'],size=1,p=_enemies['prob'])[0]
-      self.enemy = getattr(__import__('enemies'),enemy)(enemy_level)
+      self.enemy = getattr(__import__('enemies'),enemy)(enemy_lvl)
     else:
-      self.enemy = getattr(__import__('enemies'),enemy)(enemy_level)
+      self.enemy = getattr(__import__('enemies'),enemy)(enemy_lvl)
     self.is_trap = is_trap
     super().__init__(x, y, intro_text, is_hidden = is_hidden, search_level = search_lvl)
 

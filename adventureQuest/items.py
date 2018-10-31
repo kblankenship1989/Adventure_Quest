@@ -34,7 +34,7 @@ class Weapon(Item):
         print("Something went horribly wrong!")
       elif new_quality < start_quality:
         print("You apparently do not have much experience with {}s, as you have made it worse than it was before!".format(self.name))
-      elif new_quality >= self.max_quality:
+      elif new_quality > self.max_quality:
         player.repair_skill += 2
         player.xp_gain(5)
         print("You are a master of ingenuity!  You have repaired your {} to a level greater than any have ever thought possible!".format(self.name))
@@ -62,6 +62,9 @@ class Weapon(Item):
     elif self.quality > self.max_quality:
       self.damage = self.max_damage + 1
       print("Your {} is a shining example of quality, dealing slightly more damage than any other of its kind!".format(self.name))
+    elif self.quality == self.max_quality:
+      self.damage = self.max_damage
+      print("Your {} is back to its original quality.".format(self.name))
     else:
       print("You notice your {} is not as fine as it once was, but it is still good at damaging things so you're not worried.".format(self.name)) 
 
@@ -101,7 +104,7 @@ class Armour(Item):
     return super().__str__() + "\nProtection: {}\nQuality: {}".format(self.protection, self.quality)
 
   def repair(self, player):
-    new_quality = random.randint(0, self.max_quality) + player.repair_skill
+    new_quality = random.randint(-2, self.max_quality) + player.repair_skill
     confirm = input("Your repair skill is {}.\nAre you sure you want to attempt to repair it?\nYou may risk damaging it if you don't know what you are doing. [y/n]".format(player.repair_skill))
     if confirm.lower() == "y":
       start_quality = self.quality
@@ -110,7 +113,7 @@ class Armour(Item):
         print("Something went horribly wrong!")
       elif new_quality < start_quality:
         print("You apparently do not have much experience with {}s, as you have made it worse than it was before!".format(self.name))
-      elif new_quality >= self.max_quality:
+      elif new_quality > self.max_quality:
         player.repair_skill += 2
         player.xp_gain(5)
         print("You are a master of ingenuity!  You have repaired your {} to a level greater than any have ever thought possible!".format(self.name))
@@ -138,7 +141,11 @@ class Armour(Item):
     elif self.quality > self.max_quality:
       self.protection = self.max_protection + 1
       print("Your {} is a shining example of quality, protecting you from slightly more damage than any other of its kind!".format(self.name))
+    elif self.quality == self.max_quality:
+      self.protection = self.max_protection
+      print("Your {} is back to its original quality.".format(self.name
     else:
+      self.protection = self.max_protection
       print("You notice your {} is not as fine as it once was, but it is still good at damaging things so you're not worried.".format(self.name)) 
 
   def shatter(self, player):

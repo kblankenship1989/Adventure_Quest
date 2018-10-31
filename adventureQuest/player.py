@@ -11,9 +11,11 @@ class Player:
     if difficulty.lower() == "easy":
       self.hp = 100
       self.max_hp = 100
-      self.repair_skill = 3
-      self.search_skill = 3
-      self.initiative = 10
+      self.repair_skill = 0
+      self.search_skill = 0
+      self.initiative = 0
+      self.skill_pts_per_lvl = 6
+      self.start_skill_pts = 15
       self.gold = 50
       self.inventory = [items.MinorHealthPotion(), items.MinorHealthPotion()]
       self.equipped_weapon = items.Sword()
@@ -21,9 +23,11 @@ class Player:
     elif difficulty.lower() == "medium":
       self.hp = 75
       self.max_hp = 75
-      self.repair_skill = 2
-      self.search_skill = 2
-      self.initiative = 5
+      self.repair_skill = 0
+      self.search_skill = 0
+      self.initiative = 0
+      self.skill_pts_per_lvl = 4
+      self.start_skill_pts = 10
       self.gold = 25
       self.inventory = [items.MinorHealthPotion()]
       self.equipped_weapon = items.Dagger()
@@ -31,9 +35,11 @@ class Player:
     else:
       self.hp = 50
       self.max_hp = 50
-      self.repair_skill = 1
-      self.search_skill = 1
-      self.initiative = 3
+      self.repair_skill = 0
+      self.search_skill = 0
+      self.initiative = 0
+      self.skill_pts_per_lvl = 2
+      self.start_skill_pts = 5
       self.gold = 15
       self.inventory = []
       self.equipped_weapon = items.Dagger()
@@ -44,11 +50,10 @@ class Player:
     self.victory = False  
     self.quit = False
     self.xp = 0
-    self.level = 1
+    self.level = 0
     self.hp_per_lvl = 10
-    self.repair_skill_per_lvl = 1
-    self.search_skill_per_lvl = 1
-    self.initiative_per_lvl = 2
+    self.level_up()
+    self.skill_pts = 0
     
   def quit_game(self):
     self.quit = True
@@ -59,13 +64,38 @@ class Player:
       self.level_up()
     
   def level_up(self):
-    print("You leveled up! You are now level {}".format(self.level))
-    self.max_hp += self.hp_per_lvl
-    self.hp += self.hp_per_lvl
-    self.initiative += self.initiative_per_lvl
-    self.repair_skill += self.repair_skill_per_lvl
-    self.search_skill += self.search_skill_per_lvl
     self.level += 1
+    print("You leveled up! You are now level {}".format(self.level))
+    if self.level > 1:
+      self.max_hp += self.hp_per_lvl
+      self.hp += self.hp_per_lvl
+      self.skill_pts += self.skill_pts_per_lvl
+    else:
+      self.skill_pts += self.start_skill_pts
+    _quit = False
+    while self.skill_pts > 0 and not _quit:
+      print("Select stat to increase:")
+      print("r: Repair skill (Current: {})".format(self.repair_skill))
+      print("s: Search skill (Current: {})".format(self.search_skill))
+      print("i: Initiative (Current: {})".format(self.initiative))
+      print("x: Cancel")
+      stat = input("Stat:")
+      if stat.lower() not in ['r','s','i','x']:
+        print("Invalid selection!")
+      else:
+        if stat.lower() == 'x':
+          _quit = True
+        elif stat.lower() == 'r':
+          self.repair_skill += 1
+          self.skill_pts -= 1
+        elif stat.lower() == 's':
+          self.search_skill += 1
+          self.skill_pts -= 1
+        elif stat.lower() == 'i':
+          self.initiative += 1
+          self.skill_pts -= 1
+        else:
+          print("Invalid selection!")
   
   def is_alive(self):
     return self.hp > 0

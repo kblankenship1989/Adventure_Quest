@@ -48,7 +48,7 @@ def get_available_actions(room, player):
       action_adder(actions, 'x', player.examine_enemy, "Examine body")
     if isinstance(room, world.NPCTile):
       if room.npc.npc_class == "Trader":
-        action_adder(acttions,'t',player.trade,"Trade")
+        action_adder(actions,'t',player.trade,"Trade")
     if world.tile_at(room.x, room.y - 1):
       if world.tile_at(room.x, room.y-1).is_hidden:
         action_adder(actions, 'sw', player.search_north, "Search north wall")
