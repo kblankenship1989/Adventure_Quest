@@ -355,3 +355,7 @@ class Player:
         enemy.loot = []
       else:
         print("You examin the lifeless body of the {} and find nothing of interest.  Your journey continues".format(enemy.name))
+
+  def trade(self):
+    npc = world.tile_at(self.location_x, self.location_y).npc
+    npc.check_if_trade(self)

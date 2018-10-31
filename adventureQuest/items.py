@@ -25,7 +25,7 @@ class Weapon(Item):
     return super().__str__() + "\nDamage: {}\nQuality: {}".format(self.damage, self.quality)
 
   def repair(self, player):
-    new_quality = random.randInt(0, self.max_quality) + player.repair_skill
+    new_quality = random.randint(0, self.max_quality) + player.repair_skill
     confirm = input("Your repair skill is {}.\nAre you sure you want to attempt to repair it?\nYou may risk damaging it if you don't know what you are doing. [y/n]".format(player.repair_skill))
     if confirm.lower() == "y":
       start_quality = self.quality
@@ -73,13 +73,14 @@ class Dagger(Weapon):
   def __init__(self):
     super().__init__("Dagger", "A small rusty dagger with a blunt edge.  Quick and easy to use though", 5, 5, 15, 0)
 
-class Rock(Weapon):
+class Club(Weapon):
   def __init__(self):
-    super().__init__("Rock", "A small rock, good for bludgeoning but not much else.", 0, 3, 10, 0)
+    super().__init__("Club", "A wooden club, good for bludgeoning.", 7, 8, 10, 1)
 
 class Sword(Weapon):
   def __init__(self):
     super().__init__("Sword", "A sharp, well-balanced shortsword.  Keen and lethal.", 10, 10, 20, 2)
+    
 
 class BroadAxe(Weapon):
   def __init__(self):
@@ -100,7 +101,7 @@ class Armour(Item):
     return super().__str__() + "\nProtection: {}\nQuality: {}".format(self.protection, self.quality)
 
   def repair(self, player):
-    new_quality = random.randInt(0, self.max_quality) + player.repair_skill
+    new_quality = random.randint(0, self.max_quality) + player.repair_skill
     confirm = input("Your repair skill is {}.\nAre you sure you want to attempt to repair it?\nYou may risk damaging it if you don't know what you are doing. [y/n]".format(player.repair_skill))
     if confirm.lower() == "y":
       start_quality = self.quality

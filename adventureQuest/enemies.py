@@ -77,33 +77,30 @@ class Goblin(Enemy):
  
 class RatSwarm(Enemy):
   def __init__(self, level):
-    super().__init__('Rat', 2, 2, 0, 3)
- 
-  def __init__(self, level):
-    super().__init__(name = "Giant Spider"
-                  , base_max_hp = 10
-                  , max_hp_per_lvl = 2
-                  , base_damage = 5
+    super().__init__(name = "Rat Swarm"
+                  , base_max_hp = 20
+                  , max_hp_per_lvl = 1
+                  , base_damage = 3
                   , damage_per_lvl = 1
-                  , base_protection = 5
+                  , base_protection = 0
                   , protection_per_lvl = 1
-                  , base_initiative = 5
-                  , base_xp = 3
-                  , xp_per_lvl = 1
-                  , initiative_per_lvl = 0.2
+                  , base_initiative = 2
+                  , base_xp = 1
+                  , xp_per_lvl = 0.5
+                  , initiative_per_lvl = 0.1
                   , level = level)
       
 class Ogre(Enemy):
   def __init__(self, level):
-    super().__init__(name = "Giant Spider"
-                  , base_max_hp = 10
-                  , max_hp_per_lvl = 2
-                  , base_damage = 5
-                  , damage_per_lvl = 1
-                  , base_protection = 5
+    super().__init__(name = "Ogre"
+                  , base_max_hp = 30
+                  , max_hp_per_lvl = 4
+                  , base_damage = 10
+                  , damage_per_lvl = 2
+                  , base_protection = 10
                   , protection_per_lvl = 1
-                  , base_initiative = 5
-                  , base_xp = 3
-                  , xp_per_lvl = 1
-                  , initiative_per_lvl = 0.2
+                  , base_initiative = 3
+                  , base_xp = 7
+                  , xp_per_lvl = 3
+                  , initiative_per_lvl = 0.1
                   , level = level)

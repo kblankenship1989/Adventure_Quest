@@ -9,7 +9,7 @@
 			" | |X| |X| | | | |X| | |X| | | | | |E|D| ",
 			"X|X|X|X|X|X|X| | |X|X|X|X| | | | | |X| | ",
 			"X| | | | | | | | | | |X| | | |T| | |X| | ",
-			"X| | | |T| | | | | | |X| | |X|X|X|X|X|X| ",
+			"X| | | |T| | | | | | |X| | |L|X|X|X|X|X| ",
 			"X| | |X|X|X| | | | | |X| | | |X| | | |X| ",
 			"X| | |X| |X| | | |X|X|X| | | |X|X|X| |X| ",
 			"X| | |X| |X| | | |X| |X| | | |X| |X|X|X| ",
@@ -23,7 +23,7 @@
       "enemy_max_level":3
 			},
 		"items":{
-			"item":["MinorHealthPotion","Dagger","LightArmour","HealthPotion","ChainMail","Sword"],
+			"item":["MinorHealthPotion","Dagger","LightArmour","HealthPotion","ChainMail","Club"],
 			"prob":[0.3,0.2,0.1,0.2,0.05,0.15]
 			},
 		"trade_inventory":{
@@ -59,7 +59,7 @@
 				"x":18,
 				"y":4,
 				"kwargs":{
-          "enemy":"Ogre"
+          "enemy":"GiantSpider"
 				}
       },
       {
@@ -77,6 +77,37 @@
 					"is_hidden":true,
           "search_lvl":2
 				}
-			}]
+			},
+      {
+        "x":14,
+        "y":7,
+        "kwargs":{
+          "item":"Sword"
+        }
+      },
+      {
+        "x":19,
+        "y":1,
+        "kwargs":{
+          "npc":"Trader",
+          "npc_name":"Tim"
+        }
+      },
+      {
+        "x":15,
+        "y":6,
+        "kwargs":{
+          "npc":"Trader",
+          "npc_name":"Tim"
+        }
+      },
+      {
+        "x":4,
+        "y":7,
+        "kwargs":{
+          "npc":"Trader",
+          "npc_name":"Tim"
+        }
+      }]
 		}
 	}

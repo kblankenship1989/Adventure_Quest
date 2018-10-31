@@ -143,10 +143,9 @@ class DungeonEnd(MapTile):
       print("You have found the exit to the dungeon but it appears to be locked and you don't have the right key.\nYou will have to continue exploring until you find it.")
 
 class NPCTile(MapTile):
-  def __init__(self, x, y, npc = NPC.NPC("Steve"), intro_text = "Another traveler stands before you"):
-    self.npc = npc
+  def __init__(self, x, y, npc = "NPC", npc_name = 'Steve', intro_text = "Another traveler stands before you"):
+    self.npc = getattr(__import__('npc'),npc)(npc_name)
     super().__init__(x, y, intro_text, "T", False)
- 
  
 def load_levels():
   with open('resources/levels.json','r') as f:
