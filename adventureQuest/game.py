@@ -4,6 +4,7 @@ import world
 import enemies
 import items
 import npc
+from os import system, name
 
 def play(level, p):
   world.load_tiles(level)
@@ -15,6 +16,12 @@ def play(level, p):
       room.enter_room(p)
     prev_turn = (p.location_x, p.location_y)
     choose_action(room, p)
+
+def clear(): 
+    if name == 'nt': 
+        _ = system('cls')  
+    else: 
+        _ = system('clear')
     
 
 def choose_action(room, player):
@@ -24,6 +31,7 @@ def choose_action(room, player):
       action_input = input("Action: ")
       action = available_actions.get(action_input.upper())
       if action:
+        clear()
         action()
       else:
         print("Invalid action!")
@@ -77,16 +85,15 @@ def get_available_actions(room, player):
 	
 
 
-def action_adder(action_dict, hotkey, action, name):
+def action_adder(action_dict, hotkey, action, actionName):
   action_dict[hotkey.upper()] = action
-  print("{}: {}".format(hotkey, name))
+  print("{}: {}".format(hotkey, actionName))
 
 if __name__ == '__main__':
   quit = False
   while not quit:
     player_name = input("Enter player name: ")
     difficulty = input("Enter difficulty [easy / medium / hard]:  ")
-    p = Player(player_name, difficulty)
     world.load_levels()
     lvls = sorted(world._levels.keys())
     level = None
@@ -99,4 +106,5 @@ if __name__ == '__main__':
         level = lvls[int(lvl_input)-1]
       else:
         print("Invalid level")
-      play(level, p)
+    p = Player(player_name, difficulty)
+    play(level, p)

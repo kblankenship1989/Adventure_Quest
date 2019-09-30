@@ -3,6 +3,13 @@ import  random
 import  enemies
 import  world
 import math
+from os import system, name
+
+def clear(): 
+    if name == 'nt': 
+        _ = system('cls')  
+    else: 
+        _ = system('clear')
 
 class Player:
   def __init__(self, name, difficulty):
@@ -69,6 +76,8 @@ class Player:
       self.skill_pts += self.start_skill_pts
     _quit = False
     while self.skill_pts > 0 and not _quit:
+      clear()
+      print("You leveled up! You are now level {}".format(self.level))
       print("You have {} skill pts to use!".format(self.skill_pts))
       print("Select stat to increase:")
       print("r: Repair skill (Current: {})".format(self.repair_skill))
