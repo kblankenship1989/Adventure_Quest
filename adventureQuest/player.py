@@ -11,11 +11,8 @@ class Player:
     if difficulty.lower() == "easy":
       self.hp = 100
       self.max_hp = 100
-      self.repair_skill = 0
-      self.search_skill = 0
-      self.initiative = 0
-      self.skill_pts_per_lvl = 6
-      self.start_skill_pts = 15
+      self.skill_pts_per_lvl = 3
+      self.start_skill_pts = 8
       self.gold = 50
       self.inventory = [items.MinorHealthPotion(), items.MinorHealthPotion()]
       self.equipped_weapon = items.Sword()
@@ -23,11 +20,8 @@ class Player:
     elif difficulty.lower() == "medium":
       self.hp = 75
       self.max_hp = 75
-      self.repair_skill = 0
-      self.search_skill = 0
-      self.initiative = 0
-      self.skill_pts_per_lvl = 4
-      self.start_skill_pts = 10
+      self.skill_pts_per_lvl = 2
+      self.start_skill_pts = 5
       self.gold = 25
       self.inventory = [items.MinorHealthPotion()]
       self.equipped_weapon = items.Dagger()
@@ -35,15 +29,16 @@ class Player:
     else:
       self.hp = 50
       self.max_hp = 50
-      self.repair_skill = 0
-      self.search_skill = 0
-      self.initiative = 0
-      self.skill_pts_per_lvl = 2
-      self.start_skill_pts = 5
+      self.skill_pts_per_lvl = 1
+      self.start_skill_pts = 2
       self.gold = 15
       self.inventory = []
       self.equipped_weapon = items.Dagger()
       self.equipped_armour = items.Cloth()
+    self.repair_skill = 0
+    self.search_skill = 0
+    self.initiative = 0
+    self.skill_pts = 0
     self.location_x, self.location_y = world.starting_position
     self.prev_location_x = self.location_x
     self.prev_location_y = self.location_y
@@ -60,7 +55,7 @@ class Player:
     
   def xp_gain(self, xp):
     self.xp += xp
-    if self.xp > round(self.level*math.log10(self.level)*50,0):
+    if self.xp > round(self.level*math.log10(self.level+1)*10,0):
       self.level_up()
     
   def level_up(self):
@@ -74,6 +69,7 @@ class Player:
       self.skill_pts += self.start_skill_pts
     _quit = False
     while self.skill_pts > 0 and not _quit:
+      print("You have {} skill pts to use!".format(self.skill_pts))
       print("Select stat to increase:")
       print("r: Repair skill (Current: {})".format(self.repair_skill))
       print("s: Search skill (Current: {})".format(self.search_skill))

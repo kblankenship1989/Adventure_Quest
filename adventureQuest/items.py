@@ -143,7 +143,7 @@ class Armour(Item):
       print("Your {} is a shining example of quality, protecting you from slightly more damage than any other of its kind!".format(self.name))
     elif self.quality == self.max_quality:
       self.protection = self.max_protection
-      print("Your {} is back to its original quality.".format(self.name
+      print("Your {} is back to its original quality.".format(self.name))
     else:
       self.protection = self.max_protection
       print("You notice your {} is not as fine as it once was, but it is still good at damaging things so you're not worried.".format(self.name)) 
